@@ -4,13 +4,14 @@ const gulp = require('gulp'),
       concat = require('gulp-concat'),
       browserSync = require("browser-sync").create(),
       sass = require('gulp-sass'),
-      importCss = require('gulp-import-css'),
       cleanCss = require('gulp-clean-css'),
       prefixer = require('gulp-autoprefixer'),
       uglify = require('gulp-uglify'),
       image = require('gulp-image'),
       del = require('del'),
       reload = browserSync.reload;
+
+sass.compiler = require('node-sass');
 
 const path = {
     build: {
@@ -23,6 +24,7 @@ const path = {
     src: {
         html: 'src/*.html',
         js: 'src/js/*.js',
+        anime: 'node_modules/animejs/lib/anime.min.js',
         style: 'src/styles/style.scss',
         img: 'src/images/**/*.*',
         fonts: 'src/fonts/**/*.*'
@@ -44,7 +46,7 @@ function html() {
 }
 
 function js() {
-    return gulp.src(path.src.js)
+    return gulp.src([path.src.anime, path.src.js])
         .pipe(concat('script.js'))
         .pipe(uglify())
         .pipe(gulp.dest(path.build.js))
@@ -53,16 +55,13 @@ function js() {
 
 function style() {
     return gulp.src(path.src.style)
-        .pipe(importCss())
+        .pipe(sass())
         .pipe(cleanCss({
             compatibility: 'ie8'
         }))
         .pipe(prefixer({
             browsers: ['> 0.1%'],
             cascade: false
-        }))
-        .pipe(sass({
-            outputStyle: 'compressed'
         }))
         .pipe(gulp.dest(path.build.css))
         .pipe(reload({stream: true}));
